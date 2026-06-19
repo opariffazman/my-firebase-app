@@ -369,14 +369,14 @@
        TODO: Replace placeholder values with your project's Firebase config.
              Find it at: Firebase Console → Project Settings → Your apps
        ------------------------------------------------------------------------- */
-    const firebaseConfig = {
-      apiKey:            "YOUR_API_KEY_HERE",
-      authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId:         "YOUR_PROJECT_ID",
-      storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId:             "YOUR_APP_ID"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyB-j7NngXoJk5IlFBfXm9okPDJYBHAoF8s",
+  authDomain: "iskl-new.firebaseapp.com",
+  projectId: "iskl-new",
+  storageBucket: "iskl-new.firebasestorage.app",
+  messagingSenderId: "7658659126",
+  appId: "1:7658659126:web:a109c047cf09920b9fe797"
+};
 
     /* Auto-detect mock mode: true until a real API key is pasted in */
     const isMockMode = firebaseConfig.apiKey === "YOUR_API_KEY_HERE";
@@ -440,14 +440,22 @@
         e.preventDefault();
         const email    = document.getElementById('emailInput').value;
         const password = document.getElementById('passwordInput').value;
-        // TODO: await signInWithEmailAndPassword(auth, email, password);
-        console.log("TODO: signInWithEmailAndPassword for", email);
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+          console.error("Email sign-in error:", err);
+          alert(err.message);
+        }
       });
 
       /* Google sign-in */
       document.getElementById('signInGoogleBtn').addEventListener('click', async () => {
-        // TODO: await signInWithPopup(auth, gProvider);
-        console.log("TODO: signInWithPopup (Google)");
+        try {
+          await signInWithPopup(auth, gProvider);
+        } catch (err) {
+          console.error("Google sign-in error:", err);
+          alert(err.message);
+        }
       });
 
       /* Sign out */
