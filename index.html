@@ -4,436 +4,332 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CloudNotes - Secure Notes App</title>
-  
-  <!-- Modern Google Fonts -->
+  <meta name="description" content="CloudNotes — a secure, beautifully designed note-taking app powered by Firebase.">
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome Icons for Beautiful Buttons/Inputs -->
+
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- =========================================================================
-       CSS STYLESHEET (Responsive Grid, Light/Dark variables, Glassmorphism)
+       CSS — Design tokens, light/dark mode, glassmorphism, responsive layout
        ========================================================================= -->
   <style>
-    /* Design System Tokens */
+    /* ---------- Design System Tokens ---------- */
     :root {
-      --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      
-      /* Light Mode Color Palette */
-      --bg-primary: #f1f5f9;
-      --bg-accent-gradient: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
-      --bg-card: rgba(255, 255, 255, 0.75);
-      --bg-input: #ffffff;
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --border-color: rgba(226, 232, 240, 0.8);
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --google-btn: #ffffff;
-      --google-text: #374151;
-      --google-border: #d1d5db;
-      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+      --transition: all 0.3s var(--ease);
       --glass-blur: 16px;
+      --radius-card: 24px;
+      --radius-btn: 12px;
       --gradient-brand: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+
+      /* Light mode palette */
+      --bg:           #f1f5f9;
+      --bg-gradient:  linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+      --card:         rgba(255, 255, 255, 0.75);
+      --input-bg:     #ffffff;
+      --text:         #0f172a;
+      --text-muted:   #475569;
+      --border:       rgba(226, 232, 240, 0.8);
+      --shadow:       0 20px 25px -5px rgba(0,0,0,.05), 0 10px 10px -5px rgba(0,0,0,.03);
+      --primary:      #4f46e5;
+      --g-btn:        #ffffff;
+      --g-text:       #374151;
+      --g-border:     #d1d5db;
     }
 
     [data-theme="dark"] {
-      /* Dark Mode Color Palette */
-      --bg-primary: #0b0f19;
-      --bg-accent-gradient: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
-                            radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.15), transparent 40%);
-      --bg-card: rgba(17, 24, 39, 0.7);
-      --bg-input: rgba(31, 41, 55, 0.5);
-      --text-primary: #f9fafb;
-      --text-secondary: #9ca3af;
-      --border-color: rgba(75, 85, 99, 0.4);
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
-      --google-btn: #1f2937;
-      --google-text: #f9fafb;
-      --google-border: rgba(75, 85, 99, 0.4);
-      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      /* Dark mode palette */
+      --bg:           #0b0f19;
+      --bg-gradient:  radial-gradient(circle at top right,   rgba(99,102,241,.15), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(168,85,247,.15), transparent 40%);
+      --card:         rgba(17, 24, 39, 0.7);
+      --input-bg:     rgba(31, 41, 55, 0.5);
+      --text:         #f9fafb;
+      --text-muted:   #9ca3af;
+      --border:       rgba(75, 85, 99, 0.4);
+      --shadow:       0 25px 50px -12px rgba(0,0,0,.5);
+      --primary:      #6366f1;
+      --g-btn:        #1f2937;
+      --g-text:       #f9fafb;
+      --g-border:     rgba(75, 85, 99, 0.4);
     }
 
-    /* Reset & Base Styles */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    /* ---------- Reset ---------- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ---------- Body ---------- */
     body {
-      font-family: var(--font-family);
-      background-color: var(--bg-primary);
-      background-image: var(--bg-accent-gradient);
-      color: var(--text-primary);
+      font-family: var(--font);
+      background-color: var(--bg);
+      background-image: var(--bg-gradient);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       overflow-x: hidden;
-      transition: background-color 0.5s ease, color 0.5s ease;
       padding: 20px;
+      transition: background-color .5s ease, color .5s ease;
     }
 
-    /* Floating Header & Theme Switcher */
+    /* ---------- Header ---------- */
     header {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 40px;
+      padding: 18px 40px;
       z-index: 10;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
 
-    .logo-container {
+    .logo {
       display: flex;
       align-items: center;
       gap: 10px;
       font-weight: 700;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       background: var(--gradient-brand);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .theme-toggle-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      cursor: pointer;
-      width: 44px;
-      height: 44px;
+    /* Light / Dark toggle button */
+    #themeToggle {
+      width: 44px; height: 44px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
       box-shadow: var(--shadow);
       transition: var(--transition);
     }
+    #themeToggle:hover { transform: scale(1.1); border-color: var(--primary); }
 
-    .theme-toggle-btn:hover {
-      transform: scale(1.1);
-      border-color: var(--primary);
-    }
-
-    /* Card Layout (Glassmorphism & Responsive Widths) */
-    .card-container {
-      background: var(--bg-card);
+    /* ---------- Card ---------- */
+    .card {
+      background: var(--card);
       backdrop-filter: blur(var(--glass-blur));
       -webkit-backdrop-filter: blur(var(--glass-blur));
-      border: 1px solid var(--border-color);
-      border-radius: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
       padding: 40px;
-      width: 100%;
-      max-width: 480px;
+      width: 100%; max-width: 480px;
       box-shadow: var(--shadow);
-      transition: var(--transition);
       margin-top: 80px;
+      transition: var(--transition);
     }
 
-    /* Screens Toggle */
-    .screen {
-      display: none;
-    }
-
+    /* ---------- Screen visibility ---------- */
+    .screen { display: none; }
     .screen.active {
       display: block;
-      animation: fadeIn 0.4s ease-in-out;
+      animation: fadeUp .4s var(--ease);
     }
 
-    /* Auth Screen styling */
+    /* ---------- Auth screen ---------- */
+    .mock-badge {
+      display: inline-block;
+      background: #eab308; color: #000;
+      font-size: .72rem; font-weight: 700;
+      padding: 2px 10px; border-radius: 20px;
+      margin-bottom: 14px;
+    }
+
     .screen-title {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      text-align: center;
+      font-size: 1.9rem; font-weight: 700;
+      text-align: center; margin-bottom: 6px;
+    }
+    .screen-sub {
+      color: var(--text-muted); font-size: .92rem;
+      text-align: center; margin-bottom: 28px;
     }
 
-    .screen-subtitle {
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      margin-bottom: 30px;
-      text-align: center;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-      position: relative;
-    }
-
-    .form-group i {
-      position: absolute;
-      left: 16px;
-      top: 50%;
+    /* Form inputs */
+    .form-group { position: relative; margin-bottom: 18px; }
+    .form-group .icon {
+      position: absolute; left: 15px; top: 50%;
       transform: translateY(-50%);
-      color: var(--text-secondary);
+      color: var(--text-muted); pointer-events: none;
     }
-
     .form-input {
       width: 100%;
-      padding: 14px 16px 14px 44px;
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      background-color: var(--bg-input);
-      color: var(--text-primary);
-      font-family: var(--font-family);
-      font-size: 1rem;
-      transition: var(--transition);
+      padding: 13px 16px 13px 44px;
+      border-radius: var(--radius-btn);
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-family: var(--font); font-size: 1rem;
       outline: none;
+      transition: var(--transition);
     }
-
     .form-input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+      box-shadow: 0 0 0 4px rgba(99,102,241,.15);
     }
 
-    /* Buttons Styling */
+    /* Buttons */
     .btn {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      font-family: var(--font-family);
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
+      width: 100%; padding: 13px;
+      border-radius: var(--radius-btn);
+      font-family: var(--font); font-size: 1rem; font-weight: 600;
+      cursor: pointer; border: none; outline: none;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
       transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      outline: none;
     }
-
     .btn-primary {
       background: var(--gradient-brand);
-      color: white;
-      border: none;
+      color: #fff;
     }
-
     .btn-primary:hover {
-      opacity: 0.95;
+      opacity: .92;
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+      box-shadow: 0 8px 20px rgba(99,102,241,.35);
     }
 
     .divider {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      margin: 24px 0;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
+      display: flex; align-items: center;
+      margin: 22px 0; color: var(--text-muted); font-size: .83rem;
     }
-
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      border-bottom: 1px solid var(--border-color);
+    .divider::before, .divider::after {
+      content: ''; flex: 1; border-bottom: 1px solid var(--border);
     }
-
-    .divider:not(:empty)::before {
-      margin-right: 15px;
-    }
-
-    .divider:not(:empty)::after {
-      margin-left: 15px;
-    }
+    .divider::before { margin-right: 12px; }
+    .divider::after  { margin-left:  12px; }
 
     .btn-google {
-      background-color: var(--google-btn);
-      color: var(--google-text);
-      border: 1px solid var(--google-border);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      background: var(--g-btn);
+      color: var(--g-text);
+      border: 1px solid var(--g-border) !important;
     }
+    .btn-google:hover { transform: translateY(-1px); opacity: .88; }
+    .btn-google img { width: 20px; height: 20px; }
 
-    .btn-google:hover {
-      background-color: var(--border-color);
-      transform: translateY(-1px);
-    }
-
-    .btn-google img {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Notes App Screen styling */
+    /* ---------- Notes screen ---------- */
     .notes-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 28px; padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
     }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .user-profile { display: flex; align-items: center; gap: 10px; }
     .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      width: 36px; height: 36px; border-radius: 50%;
       background: var(--gradient-brand);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700;
     }
-
     .user-email {
-      font-size: 0.9rem;
-      font-weight: 500;
-      max-width: 150px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: .88rem; font-weight: 500;
+      max-width: 160px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
     }
-
     .btn-signout {
-      padding: 8px 16px;
-      font-size: 0.85rem;
-      background-color: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      border-radius: 8px;
+      padding: 7px 14px; font-size: .82rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px;
       cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
       transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
     }
+    .btn-signout:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 
-    .btn-signout:hover {
-      background-color: #ef4444;
-      color: white;
-      border-color: #ef4444;
-    }
-
-    .notes-empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+    .empty-state {
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
       padding: 40px 0;
     }
-
-    .notes-empty-icon {
-      font-size: 4rem;
+    .empty-icon {
+      font-size: 3.5rem; margin-bottom: 18px;
       background: var(--gradient-brand);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 20px;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       animation: float 3s ease-in-out infinite;
     }
+    .empty-title { font-size: 1.35rem; font-weight: 600; margin-bottom: 8px; }
+    .empty-body  { color: var(--text-muted); font-size: .92rem; line-height: 1.6; }
 
-    /* Testing Mock Banner */
-    .mock-badge {
-      display: inline-block;
-      background-color: #eab308;
-      color: #000;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      align-self: center;
-    }
-
-    /* Keyframe Animations */
-    @keyframes fadeIn {
+    /* ---------- Animations ---------- */
+    @keyframes fadeUp {
       from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      50%       { transform: translateY(-10px); }
     }
 
-    /* Responsive adjustments for mobile devices */
-    @media (max-width: 640px) {
-      header {
-        padding: 15px 20px;
-      }
-      .card-container {
-        padding: 30px 20px;
-        margin-top: 60px;
-      }
-      .screen-title {
-        font-size: 1.75rem;
-      }
+    /* ---------- Responsive ---------- */
+    @media (max-width: 600px) {
+      header { padding: 14px 20px; }
+      .card  { padding: 28px 18px; margin-top: 64px; }
+      .screen-title { font-size: 1.6rem; }
     }
   </style>
 </head>
 <body>
 
   <!-- =========================================================================
-       HEADER & THEME TOGGLE
+       HEADER — logo + light/dark toggle
        ========================================================================= -->
   <header>
-    <div class="logo-container">
-      <i class="fa-solid fa-square-rss"></i>
+    <div class="logo">
+      <i class="fa-solid fa-note-sticky"></i>
       <span>CloudNotes</span>
     </div>
-    <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle dark/light mode">
-      <i class="fa-solid fa-sun" id="themeIcon"></i>
+    <button id="themeToggle" aria-label="Toggle light / dark mode">
+      <i id="themeIcon" class="fa-solid fa-sun"></i>
     </button>
   </header>
 
   <!-- =========================================================================
-       MAIN CARD CONTAINER
+       MAIN CARD
        ========================================================================= -->
-  <main class="card-container">
-    
-    <!-- AUTH SCREEN (Sign In) -->
+  <main class="card">
+
+    <!-- AUTH SCREEN — shown when user is signed out -->
     <section id="authScreen" class="screen active">
-      <div style="display: flex; flex-direction: column;">
-        <span class="mock-badge" id="mockBadge">Mock / Local Preview Mode</span>
+      <div style="display:flex;justify-content:center;">
+        <span class="mock-badge" id="mockBadge">⚡ Mock / Preview Mode</span>
       </div>
       <h1 class="screen-title">Welcome Back</h1>
-      <p class="screen-subtitle">Sign in to sync your notes securely</p>
-      
-      <form id="loginForm" onsubmit="event.preventDefault();">
+      <p class="screen-sub">Sign in to access your notes securely</p>
+
+      <form id="loginForm">
         <div class="form-group">
-          <i class="fa-solid fa-envelope"></i>
-          <input type="email" id="emailInput" class="form-input" placeholder="Email Address" required>
+          <i class="fa-solid fa-envelope icon"></i>
+          <input id="emailInput" type="email" class="form-input" placeholder="Email address" required>
         </div>
         <div class="form-group">
-          <i class="fa-solid fa-lock"></i>
-          <input type="password" id="passwordInput" class="form-input" placeholder="Password" required>
+          <i class="fa-solid fa-lock icon"></i>
+          <input id="passwordInput" type="password" class="form-input" placeholder="Password" required>
         </div>
-        
-        <button type="submit" id="signInEmailBtn" class="btn btn-primary">
-          <i class="fa-solid fa-arrow-right-to-bracket"></i>
-          Sign In
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
         </button>
       </form>
 
       <div class="divider">or</div>
 
       <button id="signInGoogleBtn" class="btn btn-google">
-        <img src="https://lh3.googleusercontent.com/COxitqgJr1sKmZGs2F54q8t6p85e5S7LXN39JGPqSV5tKxCDoeQLCUtz6vt95SYA4zCHm7ggw4wrrg" alt="Google G logo">
+        <!-- Official Google "G" logo (stable public URL) -->
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
         Sign in with Google
       </button>
     </section>
 
-    <!-- APP SCREEN (My Notes Dashboard) -->
+    <!-- NOTES SCREEN — shown when user is signed in -->
     <section id="notesScreen" class="screen">
       <div class="notes-header">
         <div class="user-profile">
@@ -441,176 +337,140 @@
           <span class="user-email" id="userEmailDisplay">user@example.com</span>
         </div>
         <button id="signOutBtn" class="btn-signout">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-          Sign Out
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
         </button>
       </div>
 
-      <!-- Empty State -->
-      <div class="notes-empty-state">
-        <i class="fa-regular fa-clipboard notes-empty-icon"></i>
-        <h2 style="font-size: 1.4rem; font-weight: 600; margin-bottom: 8px;">My Notes</h2>
-        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5;">
-          Your digital cabinet is currently empty. Start capturing your thoughts and ideas today.
-        </p>
+      <!-- Empty state placeholder (notes list goes here later) -->
+      <div class="empty-state">
+        <i class="fa-regular fa-clipboard empty-icon"></i>
+        <p class="empty-title">My Notes</p>
+        <p class="empty-body">Your cabinet is empty.<br>Start capturing your thoughts!</p>
       </div>
     </section>
 
   </main>
 
   <!-- =========================================================================
-       FIREBASE CONFIG & APPLICATION LOGIC
+       SCRIPT — Firebase ESM imports MUST be top-level in a module script.
+       Conditionally initialise Firebase or fall back to mock mode.
        ========================================================================= -->
   <script type="module">
-    // -------------------------------------------------------------------------
-    // TODO: Paste your Firebase config here. Get these details from the Firebase Console.
-    // -------------------------------------------------------------------------
+    /* Firebase SDK — loaded from Google CDN, no build step needed */
+    import { initializeApp }        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import {
+      getAuth, onAuthStateChanged,
+      signInWithEmailAndPassword,
+      signInWithPopup, GoogleAuthProvider,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    /* -------------------------------------------------------------------------
+       TODO: Replace placeholder values with your project's Firebase config.
+             Find it at: Firebase Console → Project Settings → Your apps
+       ------------------------------------------------------------------------- */
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY_HERE",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      apiKey:            "YOUR_API_KEY_HERE",
+      authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId:         "YOUR_PROJECT_ID",
+      storageBucket:     "YOUR_PROJECT_ID.appspot.com",
       messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      appId:             "YOUR_APP_ID"
     };
 
-    // Define a flag to use mock login or actual Firebase
-    // If the apiKey has been replaced/filled in, we will automatically switch off mock mode
-    const isMockMode = firebaseConfig.apiKey.includes("YOUR_API_KEY_HERE");
+    /* Auto-detect mock mode: true until a real API key is pasted in */
+    const isMockMode = firebaseConfig.apiKey === "YOUR_API_KEY_HERE";
 
-    // Dynamic UI State logic
-    const mockBadge = document.getElementById('mockBadge');
-    if (!isMockMode) {
-      mockBadge.style.display = 'none';
+    /* --- DOM refs --- */
+    const $authScreen  = document.getElementById('authScreen');
+    const $notesScreen = document.getElementById('notesScreen');
+    const $mockBadge   = document.getElementById('mockBadge');
+    const $avatar      = document.getElementById('userAvatar');
+    const $email       = document.getElementById('userEmailDisplay');
+    const $toggle      = document.getElementById('themeToggle');
+    const $icon        = document.getElementById('themeIcon');
+
+    if (!isMockMode) $mockBadge.style.display = 'none';
+
+    /* -------------------------------------------------------------------------
+       Screen switching
+       ------------------------------------------------------------------------- */
+    function showApp(user) {
+      $authScreen .classList.remove('active');
+      $notesScreen.classList.add('active');
+      $email.textContent  = user.email || 'Anonymous';
+      $avatar.textContent = user.email ? user.email[0].toUpperCase() : 'U';
+    }
+    function showAuth() {
+      $notesScreen.classList.remove('active');
+      $authScreen .classList.add('active');
     }
 
-    // Toggle Screen Elements
-    const authScreen = document.getElementById('authScreen');
-    const notesScreen = document.getElementById('notesScreen');
-    const userEmailDisplay = document.getElementById('userEmailDisplay');
-    const userAvatar = document.getElementById('userAvatar');
-
-    function showScreen(signedIn, user = null) {
-      if (signedIn) {
-        authScreen.classList.remove('active');
-        notesScreen.classList.add('active');
-        if (user) {
-          userEmailDisplay.textContent = user.email || 'Anonymous';
-          userAvatar.textContent = (user.email ? user.email.charAt(0).toUpperCase() : 'U');
-        }
-      } else {
-        notesScreen.classList.remove('active');
-        authScreen.classList.add('active');
-      }
+    /* -------------------------------------------------------------------------
+       Light / Dark theme toggle
+       — persists preference in localStorage
+       ------------------------------------------------------------------------- */
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      $icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      localStorage.setItem('theme', theme);
     }
 
-    // Initialize UI theme logic (Light / Dark mode toggle)
-    const themeToggleBtn = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    
-    // Check saved theme preference, default to dark
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon(savedTheme);
+    applyTheme(localStorage.getItem('theme') || 'dark');
 
-    themeToggleBtn.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      updateThemeIcon(newTheme);
+    $toggle.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
     });
 
-    function updateThemeIcon(theme) {
-      if (theme === 'dark') {
-        themeIcon.className = 'fa-solid fa-sun';
-      } else {
-        themeIcon.className = 'fa-solid fa-moon';
-      }
-    }
-
-    // -------------------------------------------------------------------------
-    // Setup Firebase SDK and Auth handlers
-    // -------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
+       Auth wiring — real Firebase or mock mode
+       ------------------------------------------------------------------------- */
     if (!isMockMode) {
-      console.log("Firebase App configuration detected. Initializing Firebase...");
-      
-      // Import the dynamic SDK libraries
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { 
-        getAuth, 
-        signInWithEmailAndPassword, 
-        signInWithPopup, 
-        GoogleAuthProvider, 
-        signOut, 
-        onAuthStateChanged 
-      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      /* ---- Real Firebase ---- */
+      const app      = initializeApp(firebaseConfig);
+      const auth     = getAuth(app);
+      const gProvider = new GoogleAuthProvider();
 
-      // Initialize Firebase App & Auth services
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const googleProvider = new GoogleAuthProvider();
+      /* React to auth state (handles page reload, session persistence, etc.) */
+      onAuthStateChanged(auth, user => user ? showApp(user) : showAuth());
 
-      // Listen for authentication state changes
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          showScreen(true, user);
-        } else {
-          showScreen(false);
-        }
-      });
-
-      // TODO: Implement actual Email/Password sign-in
-      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      /* Email / password sign-in */
+      document.getElementById('loginForm').addEventListener('submit', async e => {
         e.preventDefault();
-        const email = document.getElementById('emailInput').value;
+        const email    = document.getElementById('emailInput').value;
         const password = document.getElementById('passwordInput').value;
-
-        // TODO: Call signInWithEmailAndPassword(auth, email, password)
-        console.log("TODO: Authenticate email/password using Firebase auth SDK for email:", email);
-        alert("Firebase Auth Integration TODO: Handle Sign-In for " + email);
+        // TODO: await signInWithEmailAndPassword(auth, email, password);
+        console.log("TODO: signInWithEmailAndPassword for", email);
       });
 
-      // TODO: Implement actual Google OAuth Sign-in
+      /* Google sign-in */
       document.getElementById('signInGoogleBtn').addEventListener('click', async () => {
-        // TODO: Call signInWithPopup(auth, googleProvider)
-        console.log("TODO: Authenticate using Google OAuth popup provider");
-        alert("Firebase Auth Integration TODO: Handle Google Login");
+        // TODO: await signInWithPopup(auth, gProvider);
+        console.log("TODO: signInWithPopup (Google)");
       });
 
-      // TODO: Implement actual Sign Out Action
-      document.getElementById('signOutBtn').addEventListener('click', () => {
-        // TODO: Call signOut(auth)
-        signOut(auth).catch(err => console.error("Error signing out:", err));
-      });
+      /* Sign out */
+      document.getElementById('signOutBtn').addEventListener('click', () =>
+        signOut(auth).catch(err => console.error("Sign-out error:", err))
+      );
 
     } else {
-      console.log("Running in Mock Mode. Please paste your firebaseConfig keys above to connect to real Firebase.");
-      
-      // Mock handlers for interactive local testing when no config is present
-      let mockUser = null;
+      /* ---- Mock mode — test UI without a Firebase project ---- */
+      console.info("CloudNotes: running in mock mode. Paste your Firebase config to go live.");
 
-      document.getElementById('loginForm').addEventListener('submit', (e) => {
+      document.getElementById('loginForm').addEventListener('submit', e => {
         e.preventDefault();
-        const email = document.getElementById('emailInput').value;
-        mockUser = { email: email };
-        console.log("Mock Mode: User logged in with email: ", email);
-        showScreen(true, mockUser);
+        showApp({ email: document.getElementById('emailInput').value });
       });
 
       document.getElementById('signInGoogleBtn').addEventListener('click', () => {
-        mockUser = { email: "google.user@example.com" };
-        console.log("Mock Mode: User logged in with Google provider");
-        showScreen(true, mockUser);
+        showApp({ email: "google.user@example.com" });
       });
 
-      document.getElementById('signOutBtn').addEventListener('click', () => {
-        mockUser = null;
-        console.log("Mock Mode: User signed out");
-        showScreen(false);
-      });
+      document.getElementById('signOutBtn').addEventListener('click', showAuth);
     }
-
   </script>
+
 </body>
 </html>
