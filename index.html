@@ -261,6 +261,16 @@
       font-size: .72rem;
       margin-top: 6px;
     }
+    .note-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .note-actions button {
+      font-family: var(--font); font-size: .78rem;
+      padding: 5px 10px; border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+      transition: var(--transition);
+    }
+    .note-actions button:hover { color: var(--text); border-color: var(--primary); }
 
     .empty-state {
       display: flex; flex-direction: column;
@@ -398,8 +408,8 @@
       signOut
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import {
-      getFirestore, collection, addDoc, serverTimestamp,
-      getDocs
+      getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
+      serverTimestamp, getDocs
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     /* -------------------------------------------------------------------------
@@ -485,6 +495,7 @@ const firebaseConfig = {
           notes = snap.docs.map(d => {
             const data = d.data();
             return {
+              id: d.id,
               text: data.text,
               author: data.author,
               ms: data.createdAt?.toMillis() ?? 0,
@@ -510,7 +521,56 @@ const firebaseConfig = {
           const who = n.author?.email || 'Unknown';
           meta.textContent = n.date ? `${who} · ${n.date.toLocaleString()}` : who;
           li.appendChild(meta);
+
+          /* Edit / delete — only on my own notes that exist in Firestore. */
+          if (n.id && n.author?.uid === currentUser?.uid) {
+            const actions = document.createElement('div');
+            actions.className = 'note-actions';
+            const edit = document.createElement('button');
+            edit.innerHTML = '<i class="fa-solid fa-pen"></i> Edit';
+            edit.addEventListener('click', () => editNote(n));
+            const del = document.createElement('button');
+            del.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
+            del.addEventListener('click', () => deleteNote(n));
+            actions.append(edit, del);
+            li.appendChild(actions);
+          }
           $notesList.appendChild(li);
+        }
+      }
+
+      /* Edit only this note's text. */
+      async function editNote(n) {
+        const text = prompt('Edit note', n.text);
+        if (text === null) return;
+        const trimmed = text.trim();
+        if (!trimmed || trimmed === n.text) return;
+        const prev = n.text;
+        n.text = trimmed;            // optimistic
+        renderNotes();
+        try {
+          await updateDoc(doc(db, 'notes', n.id), { text: trimmed });
+        } catch (err) {
+          console.error("Edit note error:", err);
+          alert(err.message);
+          n.text = prev;            // rollback
+          renderNotes();
+        }
+      }
+
+      /* Delete just this one note. */
+      async function deleteNote(n) {
+        if (!confirm('Delete this note?')) return;
+        const snapshot = notes;
+        notes = notes.filter(x => x !== n);   // optimistic
+        renderNotes();
+        try {
+          await deleteDoc(doc(db, 'notes', n.id));
+        } catch (err) {
+          console.error("Delete note error:", err);
+          alert(err.message);
+          notes = snapshot;          // rollback
+          renderNotes();
         }
       }
 
@@ -538,9 +598,11 @@ const firebaseConfig = {
         $note.value = '';
 
         try {
-          await addDoc(collection(db, 'notes'), {
+          const ref = await addDoc(collection(db, 'notes'), {
             text, author, createdAt: serverTimestamp()
           });
+          optimistic.id = ref.id;
+          renderNotes();
         } catch (err) {
           console.error("Save note error:", err);
           alert(err.message);
