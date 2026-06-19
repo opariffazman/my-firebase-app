@@ -341,6 +341,17 @@
         </button>
       </div>
 
+      <!-- Note composer -->
+      <form id="noteForm">
+        <div class="form-group">
+          <i class="fa-solid fa-pen icon"></i>
+          <input id="noteInput" type="text" class="form-input" placeholder="Write a note…" required>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i> Add Note
+        </button>
+      </form>
+
       <!-- Empty state placeholder (notes list goes here later) -->
       <div class="empty-state">
         <i class="fa-regular fa-clipboard empty-icon"></i>
@@ -364,6 +375,9 @@
       signInWithPopup, GoogleAuthProvider,
       signOut
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     /* -------------------------------------------------------------------------
        TODO: Replace placeholder values with your project's Firebase config.
@@ -430,10 +444,35 @@ const firebaseConfig = {
       /* ---- Real Firebase ---- */
       const app      = initializeApp(firebaseConfig);
       const auth     = getAuth(app);
+      const db       = getFirestore(app);
       const gProvider = new GoogleAuthProvider();
 
+      let currentUser = null;
+
       /* React to auth state (handles page reload, session persistence, etc.) */
-      onAuthStateChanged(auth, user => user ? showApp(user) : showAuth());
+      onAuthStateChanged(auth, user => {
+        currentUser = user;
+        user ? showApp(user) : showAuth();
+      });
+
+      /* Save a note to Firestore */
+      document.getElementById('noteForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const $note = document.getElementById('noteInput');
+        const text  = $note.value.trim();
+        if (!text || !currentUser) return;
+        try {
+          await addDoc(collection(db, 'notes'), {
+            text,
+            author: { uid: currentUser.uid, email: currentUser.email },
+            createdAt: serverTimestamp()
+          });
+          $note.value = '';
+        } catch (err) {
+          console.error("Save note error:", err);
+          alert(err.message);
+        }
+      });
 
       /* Email / password sign-in */
       document.getElementById('loginForm').addEventListener('submit', async e => {
